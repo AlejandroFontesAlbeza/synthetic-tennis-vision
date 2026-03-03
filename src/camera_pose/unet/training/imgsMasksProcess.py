@@ -75,7 +75,7 @@ if __name__ == "__main__":
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
     imagesUEFolderPath = os.path.join(base_dir, "camera_pose/renderUE/images/")
     masksUEFolderPath = os.path.join(base_dir, "camera_pose/renderUE/masks/")
-    imagesFolderPath = os.path.join(base_dir, "camera_pose/datasetMergeSynthetic/train/images")
-    masksFolderPath = os.path.join(base_dir, "camera_pose/datasetMergeSynthetic/train/masks")
+    imagesFolderPath = os.path.join(base_dir, "camera_pose/datasetProcessedSynthetic/images")
+    masksFolderPath = os.path.join(base_dir, "camera_pose/datasetProcessedSynthetic/masks")
     processFolders(imagesUEFolderPath, masksUEFolderPath, imagesFolderPath, masksFolderPath, os.cpu_count())
 
