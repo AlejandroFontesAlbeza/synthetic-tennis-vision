@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from camera_pose.unet.training.architecture import CustomDataset, Unet
@@ -33,7 +33,7 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_c
     model = Unet(in_channels=3, num_classes=num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.8)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
 
     for epoch in range(num_epochs):
         model.train()
@@ -85,4 +85,4 @@ if __name__ == "__main__":
 
     main(train_img_path=train_img_path, valid_img_path=valid_img_path,
         train_mask_path=train_mask_path, valid_mask_path=valid_mask_path,
-        num_classes=10, batch_size=2, num_epochs=100)
+        num_classes=10, batch_size=2, num_epochs=50)
