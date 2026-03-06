@@ -8,7 +8,7 @@ from tqdm import tqdm
 import os
 
 
-def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_classes, batch_size, num_epochs):
+def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_classes, batch_size, num_epochs, finetuning=False):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print('Training on:', device)
@@ -31,8 +31,15 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_c
 
 
     model = Unet(in_channels=3, num_classes=num_classes).to(device)
+    if finetuning == False:
+        print('Is not finetuning, training from scratch')
+        None
+    else:
+        print('Finetuning, loading model path')
+        model.load_state_dict(torch.load('modelVersions/unet_modelV0.pth', map_location=device))
+
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
 
     for epoch in range(num_epochs):
@@ -58,7 +65,7 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_c
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
-            for images, masks in tqdm(val_loader):
+            for index, (images, masks) in enumerate(tqdm(val_loader)):
                 images = images.to(device)
                 masks = masks.to(device)
 
@@ -71,8 +78,8 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_c
         
         print(f'Epoch: {epoch} / {num_epochs}, train_loss: {train_average_loss}, val_loss: {val_average_loss}, lr: {scheduler.get_last_lr()[0]}') 
 
-    torch.save(model.state_dict(), 'unet_model.pth')
-    print('model saved as unet_model.pth') 
+    torch.save(model.state_dict(), 'modelVersions/unet_modelV1.pth')
+    print('model saved') 
 
 
 
@@ -85,4 +92,4 @@ if __name__ == "__main__":
 
     main(train_img_path=train_img_path, valid_img_path=valid_img_path,
         train_mask_path=train_mask_path, valid_mask_path=valid_mask_path,
-        num_classes=10, batch_size=2, num_epochs=50)
+        num_classes=10, batch_size=2, num_epochs=25, finetuning=True)

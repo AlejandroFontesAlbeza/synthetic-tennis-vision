@@ -66,5 +66,5 @@ def inference(model_path, input_path):
 if __name__ == "__main__":
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
     model_path = os.path.join(base_dir, "unet_model.pth")
-    input_path = os.path.join(base_dir, "src/camera_pose/datasetStructuredSynthetic/valid/images/render1frame0108.png")
+    input_path = os.path.join(base_dir, "src/camera_pose/datasetReal/train/images/frames_0096_png.rf.1f03959d1ce8804dab1318f70f31c299.jpg")
     inference(model_path, input_path=input_path)
