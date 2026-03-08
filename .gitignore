@@ -1,8 +1,5 @@
-datasetReal/
-datasetProcessedSynthetic/
-datasetStructuredSynthetic/
-renderUE/
-tennisMatch/
+data/
+models/
 venv/
 __pycache__/
 *.egg-info/
