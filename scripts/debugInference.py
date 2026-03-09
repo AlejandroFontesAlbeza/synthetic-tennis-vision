@@ -1,5 +1,5 @@
-from camera_pose.utils.palette import inferenceColorPalette
-from camera_pose.unet.training.architecture import Unet
+from src.utils.palette import inferenceColorPalette
+from src.unet.architecture import Unet
 
 
 import os
@@ -64,7 +64,7 @@ def inference(model_path, input_path):
 
 
 if __name__ == "__main__":
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
-    model_path = os.path.join(base_dir, "modelVersions/unet_modelV2.pth")
-    input_path = os.path.join(base_dir, "src/camera_pose/datasetReal/train/images/frames_0030_png.rf.839bf6479edb3a1615413efa5220e2b2.jpg")
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+    model_path = os.path.join(base_dir, "models/unet_modelV2.pth")
+    input_path = os.path.join(base_dir, "data/tennisMatch/output/frames2215.png")
     inference(model_path, input_path=input_path)

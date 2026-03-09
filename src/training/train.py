@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from camera_pose.unet.training.architecture import CustomDataset, Unet
+from src.unet.architecture import CustomDataset, Unet
 from tqdm import tqdm
 import os
 
@@ -36,7 +36,7 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_c
         None
     else:
         print('Finetuning, loading model path')
-        model.load_state_dict(torch.load('modelVersions/unet_modelV1.pth', map_location=device))
+        model.load_state_dict(torch.load('models/unet_modelV1.pth', map_location=device))
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
@@ -78,17 +78,17 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path, num_c
         
         print(f'Epoch: {epoch} / {num_epochs}, train_loss: {train_average_loss}, val_loss: {val_average_loss}, lr: {optimizer.param_groups[0]["lr"]}') 
 
-    torch.save(model.state_dict(), 'modelVersions/unet_modelV2.pth')
+    torch.save(model.state_dict(), 'models/unet_modelV2.pth')
     print('model saved') 
 
 
 
 if __name__ == "__main__":
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-    train_img_path = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/train/images")
-    train_mask_path = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/train/masks")
-    valid_img_path = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/valid/images")
-    valid_mask_path = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/valid/masks")
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    train_img_path = os.path.join(base_dir, "data/dataset/train/images")
+    train_mask_path = os.path.join(base_dir, "data/dataset/train/masks")
+    valid_img_path = os.path.join(base_dir, "data/dataset/valid/images")
+    valid_mask_path = os.path.join(base_dir, "data/dataset/valid/masks")
 
     main(train_img_path=train_img_path, valid_img_path=valid_img_path,
         train_mask_path=train_mask_path, valid_mask_path=valid_mask_path,
