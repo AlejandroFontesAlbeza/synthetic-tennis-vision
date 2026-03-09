@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import os
 
 from src.utils.palette import exactColorPalette, rangeColorPalette
 
@@ -42,3 +43,24 @@ def dataProcess(inputMaskPath, outputMaskPath, inputImagePath, outputImagePath):
     image = Image.open(inputImagePath).convert("RGB")
     imageResized = image.resize((512,512), resample=Image.BILINEAR)
     imageResized.save(outputImagePath)
+
+
+def verify_split(images_folder, masks_folder):
+    image_files = sorted(os.listdir(images_folder))
+    mask_fles = sorted(os.listdir(masks_folder))
+
+    image_set = set(image_files)
+    mask_set = set(mask_fles)
+
+    missing_masks = image_set - mask_set
+    missing_images = mask_set - image_set
+
+    if len(missing_masks) == 0 and len(missing_images) == 0:
+        print(f"Correct Verification in {images_folder}")
+        print(f"Total files: {len(image_files)}")
+    else:
+        print("Problem detected")
+        if missing_masks:
+            print("Images without mask:", missing_masks)
+        if missing_images:
+            print("Masks without image:", missing_images)

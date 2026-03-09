@@ -2,85 +2,72 @@ import os
 import random
 import shutil
 from collections import defaultdict
+from tqdm import tqdm
 
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+from src.utils.preprocessing import verify_split
 
-images_dir = os.path.join(base_dir, "camera_pose/datasetProcessedSynthetic/images")
-masks_dir = os.path.join(base_dir, "camera_pose/datasetProcessedSynthetic/masks")
 
-output_train_images = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/train/images")
-output_train_masks = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/train/masks")
-output_valid_images = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/valid/images")
-output_valid_masks = os.path.join(base_dir, "camera_pose/datasetStructuredSynthetic/valid/masks")
+def splitter(images_dir, masks_dir, train_images_dir, train_masks_dir, valid_images_dir, valid_masks_dir, verification=True, split_ratio=0.7):
 
-split_ratio = 0.7
-seed = 42
+    for folder in [
+        train_images_dir, train_masks_dir,
+        valid_images_dir, valid_masks_dir
+    ]:
+        os.makedirs(folder, exist_ok=True)
 
-random.seed(seed)
+    groups = defaultdict(list)
 
-for folder in [
-    output_train_images, output_train_masks,
-    output_valid_images, output_valid_masks
-]:
-    os.makedirs(folder, exist_ok=True)
+    for filename in os.listdir(images_dir):
+        if not filename.endswith('.png'):
+            continue
+        if not os.path.isfile(os.path.join(masks_dir, filename)):
+            continue
 
-groups = defaultdict(list)
+        render_id = filename.split("frame")[0]
+        groups[render_id].append(filename)
 
-for filename in os.listdir(images_dir):
-    if not filename.endswith('.png'):
-        continue
-    if not os.path.isfile(os.path.join(masks_dir, filename)):
-        continue
-
-    render_id = filename.split("frame")[0]
-    groups[render_id].append(filename)
-
-train_files = []
-valid_files = []
+    train_files = []
+    valid_files = []
 
 
 
-for render_id, files in groups.items():
-    files.sort()
-    random.shuffle(files)
-    split_index = int(len(files) * split_ratio)
-    train_files.extend(files[:split_index])
-    valid_files.extend(files[split_index:])
+    for render_id, files in groups.items():
+        files.sort()
+        random.shuffle(files)
+        split_index = int(len(files) * split_ratio)
+        train_files.extend(files[:split_index])
+        valid_files.extend(files[split_index:])
 
 
-for f in train_files:
-    shutil.copy(os.path.join(images_dir,f), output_train_images)
-    shutil.copy(os.path.join(masks_dir,f), output_train_masks)
+    for f in tqdm(train_files, desc="Copying train files"):
+        shutil.copy(os.path.join(images_dir,f), train_images_dir)
+        shutil.copy(os.path.join(masks_dir,f), train_masks_dir)
 
-for f in valid_files:
-    shutil.copy(os.path.join(images_dir,f), output_valid_images)
-    shutil.copy(os.path.join(masks_dir,f), output_valid_masks)
+    for f in tqdm(valid_files, desc="Copying valid files"):
+        shutil.copy(os.path.join(images_dir,f), valid_images_dir)
+        shutil.copy(os.path.join(masks_dir,f), valid_masks_dir)
 
-print("Split completado")
-print(f"Train: {len(train_files)}")
-print(f"Valid: {len(valid_files)}")
+    print("Split completed")
+    print(f"Train: {len(train_files)}")
+    print(f"Valid: {len(valid_files)}")
+
+    if verification == True:
+        verify_split(train_images_dir, train_masks_dir)
+        verify_split(valid_images_dir, valid_masks_dir)
+
+    return 0
 
 
+if __name__ == "__main__":
 
-def verify_split(images_folder, masks_folder):
-    image_files = sorted(os.listdir(images_folder))
-    mask_fles = sorted(os.listdir(masks_folder))
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 
-    image_set = set(image_files)
-    mask_set = set(mask_fles)
+    images_dir = os.path.join(base_dir, "data/datasetPreProcessed/images")
+    masks_dir = os.path.join(base_dir, "data/datasetPreProcessed/masks")
 
-    missing_masks = image_set - mask_set
-    missing_images = mask_set - image_set
+    train_images_dir = os.path.join(base_dir, "data/dataset/train/images")
+    train_masks_dir = os.path.join(base_dir, "data/dataset/train/masks")
+    valid_images_dir = os.path.join(base_dir, "data/dataset/valid/images")
+    valid_masks_dir = os.path.join(base_dir, "data/dataset/valid/masks")
 
-    if len(missing_masks) == 0 and len(missing_images) == 0:
-        print(f"Correct Verification in {images_folder}")
-        print(f"Total files: {len(image_files)}")
-    else:
-        print("Problem detected")
-        if missing_masks:
-            print("Images without mask:", missing_masks)
-        if missing_images:
-            print("Masks without image:", missing_images)
-
-verify_split(output_train_images, output_train_masks)
-verify_split(output_valid_images, output_valid_masks)
+    splitter(images_dir, masks_dir, train_images_dir, train_masks_dir, valid_images_dir, valid_masks_dir)
