@@ -53,8 +53,8 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path,
     val_dataset = CustomDataset(valid_img_path, valid_mask_path, img_transform)
 
     batch_size = batch_size
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()//2)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count()//2)
 
 
     model = Unet(in_channels=3, num_classes=num_classes).to(device)
@@ -66,7 +66,7 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path,
         print(f'Finetuning, loading model path: {last_model_path}')
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
 
     for epoch in range(num_epochs):
