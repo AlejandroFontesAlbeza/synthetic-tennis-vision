@@ -3,8 +3,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from src.unet.architecture import CustomDataset, Unet
-from tqdm import tqdm
+from unet.custom_dataset import CustomDataset
+from unet.unet import Unet
+from training.metrics import epoch_trained
 import os
 
 import argparse
@@ -16,7 +17,7 @@ parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
 parser.add_argument('--batch_size', type=int, default=2, help='Batch size for training')
 parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs for training')
 parser.add_argument('--finetuning', action='store_true', help='Whether to perform fine-tuning')
-parser.add_argument('--last_model_path', type=str, default='models/unet_modelV2.pth', help='Path to the pre-trained model for fine-tuning')
+parser.add_argument('--model_path', type=str, default='models/unet_modelV1.pth', help='Path to the pre-trained model for fine-tuning')
 parser.add_argument('--new_model_path', type=str, default='models/unet_modelV3.pth', help='Path to save the fine-tuned/trained model')
 parser.add_argument('--step_lr', action='store_true', help='Whether to use StepLR')
 parser.add_argument('--step_size', type=int, default=20, help='Step size for StepLR')
@@ -24,7 +25,7 @@ parser.add_argument('--step_size', type=int, default=20, help='Step size for Ste
 args = parser.parse_args()
 
 def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path,
-        num_classes, lr, batch_size, num_epochs, finetuning=False, last_model_path=None, new_model_path=None, step_lr=True, step_size=20):
+        num_classes, lr, batch_size, num_epochs, finetuning=False, model_path=None, new_model_path=None, step_lr=True, step_size=20):
 
     print('Starting training with the following parameters:')
     print(f'  - Number of classes: {num_classes}')
@@ -34,9 +35,8 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path,
     print(f'  - Use StepLR: {step_lr}')
     print(f'  - Finetuning: {finetuning}')
     print(f'  - Step size: {step_size}')
-    if finetuning:
-        print(f'  - Last model path: {last_model_path}')
-        print(f'  - New model path: {new_model_path}')
+    print(f'  - Model path: {model_path}')
+    print(f'  - New model path: {new_model_path}')
 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,66 +64,45 @@ def main(train_img_path, valid_img_path, train_mask_path, valid_mask_path,
         print('Is not finetuning, training from scratch')
         None
     else:
-        model.load_state_dict(torch.load(last_model_path, map_location=device))
-        print(f'Finetuning, loading model path: {last_model_path}')
+        model.load_state_dict(torch.load(model_path, map_location=device))
+        print(f'Finetuning, loading model path: {model_path}')
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.8)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.6)
 
     for epoch in range(num_epochs):
-        model.train()
-        train_loss = 0.0
-        print('training...')
-
-        for index, (images, masks) in enumerate(tqdm(train_loader)):
-            images = images.to(device)
-            masks = masks.to(device)
-
-            
-            outputs = model(images)
-            loss = criterion(outputs, masks)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            train_loss += loss.item()
         
-        train_average_loss = train_loss / (index + 1)
+        train_average_loss, val_average_loss, miou = epoch_trained(model, num_classes, ignore_index=0,
+                                                            train_loader=train_loader,
+                                                            val_loader=val_loader, criterion=criterion,
+                                                            optimizer=optimizer, device=device)
 
-        model.eval()
-        val_loss = 0.0
-        with torch.no_grad():
-            for index, (images, masks) in enumerate(tqdm(val_loader)):
-                images = images.to(device)
-                masks = masks.to(device)
-
-                outputs = model(images)
-                loss = criterion(outputs, masks)
-                val_loss += loss.item()
-
-        val_average_loss = val_loss / (index + 1)
         if step_lr == True:
             scheduler.step()
         else:
             print('Not using StepLR, lr is fixed')
         
-        print(f'Epoch: {epoch} / {num_epochs}, train_loss: {train_average_loss}, val_loss: {val_average_loss}, lr: {optimizer.param_groups[0]["lr"]}') 
-
+        print(f'Epoch: {epoch} / {num_epochs}')
+        print(f'Training Loss: {train_average_loss:.4f}')
+        print(f'Validation Loss: {val_average_loss:.4f}')
+        print(f'Learning Rate: {optimizer.param_groups[0]["lr"]:.6f}')
+        print(f'mIoU: {miou * 100:.2f}%')
+        
     torch.save(model.state_dict(), new_model_path)
     print('model saved') 
 
 
 
 if __name__ == "__main__":
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-    train_img_path = os.path.join(base_dir, "data/dataset/train/images")
-    train_mask_path = os.path.join(base_dir, "data/dataset/train/masks")
-    valid_img_path = os.path.join(base_dir, "data/dataset/valid/images")
-    valid_mask_path = os.path.join(base_dir, "data/dataset/valid/masks")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    train_img_path = os.path.join(script_dir, "..", "..", "data", "dataset", "train", "images")
+    train_mask_path = os.path.join(script_dir, "..", "..", "data", "dataset", "train", "masks")
+    valid_img_path = os.path.join(script_dir, "..", "..", "data", "dataset", "valid", "images")
+    valid_mask_path = os.path.join(script_dir, "..", "..", "data", "dataset", "valid", "masks")
 
 
     main(train_img_path, valid_img_path,
         train_mask_path, valid_mask_path,
         num_classes=args.num_classes, lr=args.lr, batch_size=args.batch_size, num_epochs=args.num_epochs,
-        finetuning=args.finetuning, last_model_path=args.last_model_path, new_model_path=args.new_model_path, step_lr=args.step_lr,step_size=args.step_size)
+        finetuning=args.finetuning, model_path=args.model_path, new_model_path=args.new_model_path, step_lr=args.step_lr,step_size=args.step_size)

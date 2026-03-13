@@ -4,7 +4,7 @@ import shutil
 from collections import defaultdict
 from tqdm import tqdm
 
-from src.utils.preprocessing import verify_split
+from utils.preprocessing import verify_split
 
 
 def splitter(images_dir, masks_dir, train_images_dir, train_masks_dir, valid_images_dir, valid_masks_dir, verification=True, split_ratio=0.7):

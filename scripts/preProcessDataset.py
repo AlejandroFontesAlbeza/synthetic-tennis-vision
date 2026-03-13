@@ -1,7 +1,7 @@
 import os
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor
-from src.utils.preprocessing import dataProcess
+from utils.preprocessing import dataProcess
 
 def build_tasks(images_ue_folder, masks_ue_folder, images_out_folder, masks_out_folder):
     """

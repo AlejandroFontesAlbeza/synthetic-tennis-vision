@@ -2,7 +2,7 @@ import os
 
 import cv2
 
-from src.inference.video_io import VideoReader, VideoWriter
+from inference.video_io import VideoReader, VideoWriter
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 video_path = os.path.join(script_dir, "..", "data", "tennisMatch", "clips", "clip1.mp4")

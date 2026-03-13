@@ -1,5 +1,5 @@
-from src.utils.palette import inferenceColorPalette
-from src.unet.architecture import Unet
+from utils.palette import inferenceColorPalette
+from unet.unet import Unet
 
 
 import os
@@ -214,6 +214,6 @@ def inference(model_path, input_path):
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(script_dir, "..", "models", "unet_modelV3.pth")
+    model_path = os.path.join(script_dir, "..", "models", "unet_modelV0.pth")
     input_path = os.path.join(script_dir, "..", "data", "tennisMatch", "frames", "frame0249.png")
     inference(model_path, input_path=input_path)
