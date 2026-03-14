@@ -21,8 +21,8 @@ def test_unet_forward():
 
 def test_mask_class_range():
 	script_dir = os.path.dirname(os.path.abspath(__file__))
-	img_dir = os.path.join(script_dir, "..","..", "data", "test_dataset", "train", "images")
-	mask_dir = os.path.join(script_dir, "..","..", "data", "test_dataset", "train", "masks")
+	img_dir = os.path.join(script_dir, "..", "data", "test_dataset", "train", "images")
+	mask_dir = os.path.join(script_dir, "..", "data", "test_dataset", "train", "masks")
 	num_classes = 10
 	dataset = CustomDataset(img_dir, mask_dir)
 	mask = dataset[0][1]
