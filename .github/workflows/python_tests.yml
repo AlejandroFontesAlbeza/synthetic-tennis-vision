@@ -1,0 +1,23 @@
+name: Python Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install pytorch + cuda
+        run: pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+      - name: Install common OS dependencies
+        run: pip install -e .
+      - name: Run tests
+        run: pytest src/tests/

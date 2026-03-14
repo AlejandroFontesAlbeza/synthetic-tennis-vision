@@ -1,11 +1,11 @@
 import torch
-from torchvision import transforms
+from torch.utils.data import DataLoader, TensorDataset
 import os
 from training.metrics import calculate_IoU
 from unet.unet import Unet
 from unet.custom_dataset import CustomDataset
 from training.metrics import epoch_trained
-from torch.utils.data import DataLoader
+
 
 def test_calculate_iou_simple_case():
 	preds = torch.tensor([[0, 1], [1, 1]])
@@ -29,27 +29,25 @@ def test_mask_class_range():
 	assert mask.max() < num_classes
 	assert mask.min() >= 0
 
-def test_training_pipeline():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    train_img_path = os.path.join(script_dir, "..", "..", "data", "test_dataset", "train", "images")
-    train_mask_path = os.path.join(script_dir, "..", "..", "data", "test_dataset", "train", "masks")
-    valid_img_path = os.path.join(script_dir, "..", "..", "data", "test_dataset", "valid", "images")
-    valid_mask_path = os.path.join(script_dir, "..", "..", "data", "test_dataset", "valid", "masks")
+def test_model_epoch_trained():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_classes = 10
     in_channels = 3
-    ignore_index = 0
     lr = 0.001
-    transform = transforms.Compose([
-        transforms.Resize((512, 512)),
-		transforms.ToTensor()])
+	
+    # synthetic tensors dataset
+    x_train = torch.randn(10, in_channels, 256, 256)
+    y_train = torch.randint(0, num_classes, (10, 256, 256))
+    x_val = torch.randn(5, in_channels, 256, 256)
+    y_val = torch.randint(0, num_classes, (5, 256, 256))
+	
 
-    train_dataset = CustomDataset(train_img_path, train_mask_path, img_transform=transform)
-    val_dataset = CustomDataset(valid_img_path, valid_mask_path, img_transform=transform)
+    train_dataset = TensorDataset(x_train, y_train)
+    val_dataset = TensorDataset(x_val, y_val)
 
-    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=os.cpu_count()//2)
-    val_loader = DataLoader(val_dataset, batch_size=2, shuffle=False, num_workers=os.cpu_count()//2)
+    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=2, shuffle=False)
 
     model = Unet(in_channels=in_channels, num_classes=num_classes).to(device)
     criterion = torch.nn.CrossEntropyLoss()
@@ -59,7 +57,7 @@ def test_training_pipeline():
     val_loss = []
 	
     for epoch in range(5):
-        train_average_loss, val_average_loss, _ = epoch_trained(model, num_classes=num_classes, ignore_index=ignore_index,
+        train_average_loss, val_average_loss, _ = epoch_trained(model, num_classes=num_classes, ignore_index=0,
 																   train_loader=train_loader,
 																   val_loader=val_loader, criterion=criterion,
 																   optimizer=optimizer, device=device)

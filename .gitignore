@@ -1,7 +1,10 @@
-data/
+data/*
+!data/test_dataset/
 models/
 rsc/
 venv/
 __pycache__/
+.pytest_cache/
 *.egg-info/
 modelVersions/
+.vscode/
