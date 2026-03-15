@@ -28,7 +28,7 @@ def calculate_IoU(preds, ground_truth, num_classes, ignore_index = None):
     return ious, miou
 
 def epoch_trained(model, num_classes, ignore_index, train_loader, val_loader, criterion, optimizer, device):
-    
+
     """ Training loop for one epoch. """
 
     model.train()
