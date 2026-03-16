@@ -5,7 +5,7 @@ from collections import defaultdict
 from tqdm import tqdm
 
 from utils.preprocessing import verify_split
-
+import config
 
 def splitter(images_dir, masks_dir, train_images_dir, train_masks_dir, valid_images_dir, valid_masks_dir, verification=True, split_ratio=0.7):
 
@@ -60,16 +60,6 @@ def splitter(images_dir, masks_dir, train_images_dir, train_masks_dir, valid_ima
 
 if __name__ == "__main__":
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    images_dir = os.path.join(script_dir, "..","data","datasetPreProcessed","images")
-    masks_dir = os.path.join(script_dir, "..","data","datasetPreProcessed","masks")
-
-    train_images_dir = os.path.join(script_dir, "..","data","dataset","train","images")
-    train_masks_dir = os.path.join(script_dir, "..","data","dataset","train","masks")
-    valid_images_dir = os.path.join(script_dir, "..","data","dataset","valid","images")
-    valid_masks_dir = os.path.join(script_dir, "..","data","dataset","valid","masks")
-
-    splitter(images_dir, masks_dir,
-            train_images_dir, train_masks_dir,
-            valid_images_dir, valid_masks_dir)
+    splitter(config.PREPROCESSED_IMAGES_DIR, config.PREPROCESSED_MASKS_DIR,
+            config.DATASET_IMAGES_TRAIN_DIR, config.DATASET_MASKS_TRAIN_DIR,
+            config.DATASET_IMAGES_VALID_DIR, config.DATASET_MASKS_VALID_DIR)

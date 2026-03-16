@@ -2,6 +2,7 @@ import os
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor
 from utils.preprocessing import data_process
+import config
 
 def build_tasks(images_ue_folder, masks_ue_folder, images_out_folder, masks_out_folder):
     """
@@ -40,10 +41,6 @@ def process_folders(images_ue_folder, masks_ue_folder, images_out_folder, masks_
         )
 
 if __name__ == "__main__":
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    images_ue_folder = os.path.join(script_dir, "..", "data", "renderUE", "images")
-    masks_ue_folder = os.path.join(script_dir, "..", "data", "renderUE", "masks")
-    images_out_folder = os.path.join(script_dir, "..", "data", "datasetPreProcessed", "images")
-    masks_out_folder = os.path.join(script_dir, "..", "data", "datasetPreProcessed", "masks")
-    process_folders(images_ue_folder, masks_ue_folder, images_out_folder, masks_out_folder, os.cpu_count())
+    process_folders(config.UE_IMAGES_DIR, config.UE_MASKS_DIR,
+                    config.PREPROCESSED_IMAGES_DIR, config.PREPROCESSED_MASKS_DIR, os.cpu_count())
 
