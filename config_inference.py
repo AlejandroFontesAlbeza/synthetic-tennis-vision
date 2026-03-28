@@ -14,8 +14,4 @@ OUTPUT_GIF_NAME = "inference_output.gif"
 IP = "127.0.0.1"
 PORT = 5005
 
-### TESTING PATHS
-VIDEO_TEST_INFERENCE_PATH = ROOT_DIR / "data" / "test_rsc" / "testing_clip.mp4"
-MODEL_TEST_INFERENCE_PATH = ROOT_DIR / "data" / "test_rsc" / "unet_model_testing.pth"
-
 
