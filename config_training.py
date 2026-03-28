@@ -34,7 +34,7 @@ NEW_MODEL_PATH = MODELS_DIR / "unet_modelNew.pth"
 
 ### TESTING PATHS
 
-TEST_DATASET_IMAGES_TRAIN_DIR = DATA_DIR / "test_dataset" / "train" / "images"
-TEST_DATASET_MASKS_TRAIN_DIR = DATA_DIR / "test_dataset" / "train" / "masks"
-TEST_DATASET_IMAGES_VALID_DIR = DATA_DIR / "test_dataset" / "valid" / "images"
-TEST_DATASET_MASKS_VALID_DIR = DATA_DIR / "test_dataset" / "valid" / "masks"
+TEST_DATASET_IMAGES_TRAIN_DIR = DATA_DIR / "test_rsc" / "train" / "images"
+TEST_DATASET_MASKS_TRAIN_DIR = DATA_DIR / "test_rsc" / "train" / "masks"
+TEST_DATASET_IMAGES_VALID_DIR = DATA_DIR / "test_rsc" / "valid" / "images"
+TEST_DATASET_MASKS_VALID_DIR = DATA_DIR / "test_rsc" / "valid" / "masks"

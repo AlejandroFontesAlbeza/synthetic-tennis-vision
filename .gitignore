@@ -1,5 +1,5 @@
 data/*
-!data/test_dataset/
+!data/test_rsc/
 models/
 rsc/
 venv/

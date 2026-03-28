@@ -6,7 +6,7 @@ from unet.custom_dataset import CustomDataset
 from training.metrics import epoch_trained
 import config_training
 
-
+print("Running Training Tests...")
 def test_calculate_iou_simple_case():
 	preds = torch.tensor([[0, 1], [1, 1]])
 	labels = torch.tensor([[0, 1], [0, 1]])

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation as Rot
+from scipy.optimize import minimize_scalar
 
 
 def homography(img_intersections, real_world_points):
@@ -16,14 +17,49 @@ def homography(img_intersections, real_world_points):
         print("Not enough intersections for homography estimation.")
         return None
 
+def camera_pose_estimation(H, cx, cy, f_prev = None):
 
-def camera_pose_estimation(H, K):
+    """
+    Ideal f estimation based on the homography matrix
+    """
+
     H = H / np.linalg.norm(H[:,0])
-    K_inv = np.linalg.inv(K)
 
     h1 = H[:,0]
     h2 = H[:,1]
     h3 = H[:,2]
+
+    def error(f):
+        K = np.array([[f, 0, cx],
+                    [0, f, cy],
+                    [0, 0, 1]], dtype=np.float32)
+        K_inv = np.linalg.inv(K)
+        r1 = K_inv @ h1
+        r2 = K_inv @ h2
+        ortho = np.dot(r1, r2)
+        norm_diff = np.linalg.norm(r1) - np.linalg.norm(r2)
+        return ortho**2 + 0.1 * norm_diff**2
+
+    if f_prev is not None:
+        f_min = f_prev * 0.8
+        f_prev = f_prev * 1.2
+    else:
+        f_min = 300
+        f_prev = 5000
+
+    res = minimize_scalar(error, bounds=(f_min, f_prev), method='bounded')
+    f = res.x # x is the value we need from minimize_scalar Object
+
+    """
+    Camera pose estimation from homography
+    """
+
+    K = np.array([[f, 0, cx],
+                  [0, f, cy],
+                  [0, 0, 1]], dtype=np.float32)
+    K_inv = np.linalg.inv(K)
+
+
 
     r1 = K_inv @ h1
     r2 = K_inv @ h2
@@ -40,11 +76,15 @@ def camera_pose_estimation(H, K):
     U, _, Vt = np.linalg.svd(R)
     R = U @ Vt
 
-    R_wc = R.T
     C = -R.T @ t
     cam_position = C.flatten()
 
+    R_wc = R.T
     rot = Rot.from_matrix(R_wc)
     rx,ry,rz = rot.as_euler('xyz', degrees = True)
     cam_rotation = np.round(np.array([rx, ry, rz]), 2)
-    return cam_position, cam_rotation
+
+    FOV_x = 2 * np.arctan((cx) / f)
+    FOV_x_deg = np.rad2deg(FOV_x)
+
+    return cam_position, cam_rotation, f, FOV_x_deg
