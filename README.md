@@ -170,4 +170,5 @@ While the implementation focuses on tennis, the same approach can be applied to 
 <p align="center">
     <img src="rsc/football.gif" width="45%" />
     <img src="rsc/football.gif" width="45%" />
+
 </p>
