@@ -172,3 +172,39 @@ While the implementation focuses on tennis, the same approach can be applied to 
     <img src="rsc/football.gif" width="45%" />
 
 </p>
+
+## Acknowledgements
+
+This project was developed as a technical exploration of **synthetic data pipelines for Computer Vision and Deep Learning**.
+
+Its main goal is to demonstrate that:
+
+- Synthetic data generated in a 3D engine can replace manual annotation
+- Models trained on synthetic data can generalize to real-world scenarios
+- End-to-end pipelines can be built to solve practical vision problems
+
+The project is not intended to be a production-ready system, but rather a proof of concept combining:
+
+- Unreal Engine 5 for data generation
+- Deep learning for segmentation
+- Classical computer vision for geometry estimation
+
+It reflects an iterative development process where both the synthetic environment and the model were refined together.
+
+## References
+
+Project was inspired by work in:
+
+- Synthetic data for computer vision
+- Sports broadcast camera calibration
+- Homography and camera pose estimation
+
+Key references:
+
+- **Synthetic Data for Deep Learning** - [PAPER](https://arxiv.org/pdf/1909.11512)
+- **Multiple View Geometry in Computer Vision** – [Hartley & Zisserman](http://www.r-5.org/files/books/computers/algo-list/image-processing/vision/Richard_Hartley_Andrew_Zisserman-Multiple_View_Geometry_in_Computer_Vision-EN.pdf)
+- **U-Net-Image-Segmentation** - [AlejandroFontesAlbeza-Repository](https://github.com/AlejandroFontesAlbeza/U-Net-Image-Segmentation)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
