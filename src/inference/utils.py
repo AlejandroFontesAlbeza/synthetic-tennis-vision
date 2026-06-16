@@ -117,8 +117,6 @@ class VideoInference:
         img_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         input_tensor = self.transform(img_pil).unsqueeze(0).to(self.device)
         with torch.no_grad():
-            for _ in range(2):
-                _ = self.model(input_tensor)
             torch.cuda.synchronize() if torch.cuda.is_available() else None
             start = time.time()
             output = self.model(input_tensor)
